@@ -2,6 +2,7 @@ package cse512
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.functions._ 
 
 object HotzoneAnalysis {
 
@@ -23,15 +24,20 @@ object HotzoneAnalysis {
     // Load rectangle data
     val rectangleDf = spark.read.format("com.databricks.spark.csv").option("delimiter","\t").option("header","false").load(rectanglePath);
     rectangleDf.createOrReplaceTempView("rectangle")
+    rectangleDf.show()
 
     // Join two datasets
     spark.udf.register("ST_Contains",(queryRectangle:String, pointString:String)=>(HotzoneUtils.ST_Contains(queryRectangle, pointString)))
     val joinDf = spark.sql("select rectangle._c0 as rectangle, point._c5 as point from rectangle,point where ST_Contains(rectangle._c0,point._c5)")
     joinDf.createOrReplaceTempView("joinResult")
 
+    val resultDf = spark.sql("select rectangle, count(point) as cnt from joinResult GROUP BY rectangle ORDER BY cnt desc")
+    resultDf.createOrReplaceTempView("resultView")
+	resultDf.show()
+
     // YOU NEED TO CHANGE THIS PART
 
-    return joinDf // YOU NEED TO CHANGE THIS PART
+    return resultDf // YOU NEED TO CHANGE THIS PART
   }
 
 }
