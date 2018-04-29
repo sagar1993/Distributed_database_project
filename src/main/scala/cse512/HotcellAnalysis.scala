@@ -18,7 +18,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   // Load the original data from a data source
   var pickupInfo = spark.read.format("com.databricks.spark.csv").option("delimiter",";").option("header","false").load(pointPath);
   pickupInfo.createOrReplaceTempView("nyctaxitrips")
-  pickupInfo.show()
+  //pickupInfo.show()
 
   // Assign cell coordinates based on pickup points
   spark.udf.register("CalculateX",(pickupPoint: String)=>((
@@ -53,10 +53,10 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   //spark.sql("select * from filteredData where z > 31").show()
 
   // now to find count we create new DataFrame groupby the actual coordinates
-  var columnName = Seq("coordinates")
+  var columnName = Seq("coordinate")
   var CoordinateDF = filteredData.select((concat(col("x"), lit(","), col("y"), lit(","), col("z")))).toDF(columnName:_*)
 
-  var coordinateCountDF = CoordinateDF.groupBy("coordinates").count().orderBy(asc("coordinates")).toDF()
+  var coordinateCountDF = CoordinateDF.groupBy("coordinate").count().orderBy(asc("coordinate")).toDF()
 
   // cache this. Can also be cache persist in file system . .persist(level:StorageLevel)
   coordinateCountDF.cache()

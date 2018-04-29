@@ -24,7 +24,7 @@ object HotzoneAnalysis {
     // Load rectangle data
     val rectangleDf = spark.read.format("com.databricks.spark.csv").option("delimiter","\t").option("header","false").load(rectanglePath);
     rectangleDf.createOrReplaceTempView("rectangle")
-    rectangleDf.show()
+    //rectangleDf.show()
 
     // Join two datasets
     spark.udf.register("ST_Contains",(queryRectangle:String, pointString:String)=>(HotzoneUtils.ST_Contains(queryRectangle, pointString)))
@@ -33,7 +33,7 @@ object HotzoneAnalysis {
 
     val resultDf = spark.sql("select rectangle, count(point) as cnt from joinResult GROUP BY rectangle ORDER BY cnt desc")
     resultDf.createOrReplaceTempView("resultView")
-	resultDf.show()
+    //resultDf.show()
 
     // YOU NEED TO CHANGE THIS PART
 
